@@ -27,14 +27,20 @@ build_gdb() {
     wget https://www.mpfr.org/mpfr-current/mpfr-4.2.1.tar.gz
     tar xzf mpfr-4.2.1.tar.gz
     cd mpfr-4.2.1
-    ./configure --host=arm-none-linux-gnueabi --disable-shared --enable-static --with-gmp-build=/work/gmp-6.3.0/
+    ./configure --host=arm-none-linux-gnueabi --disable-shared --enable-static --with-gmp-build="${BUILD_DIRECTORY}/gmp-6.3.0/"
     make -j4
     make install
 
-    fetch "$GIT_BINUTILS_GDB" "${BUILD_DIRECTORY}/binutils-gdb" git
-    cd "${BUILD_DIRECTORY}/binutils-gdb/" || { echo "Cannot cd to ${BUILD_DIRECTORY}/binutils-gdb/"; exit 1; }
-    git clean -fdx
-    git checkout gdb-14.2-release
+    #fetch "$GIT_BINUTILS_GDB" "${BUILD_DIRECTORY}/binutils-gdb" git
+    #cd "${BUILD_DIRECTORY}/binutils-gdb/" || { echo "Cannot cd to ${BUILD_DIRECTORY}/binutils-gdb/"; exit 1; }
+    #git clean -fdx
+    #git checkout gdb-14.2-release
+
+    cd "${BUILD_DIRECTORY}"
+    wget https://github.com/bminor/binutils-gdb/archive/refs/tags/gdb-14.2-release.tar.gz
+    tar xzf gdb-14.2-release.tar.gz
+    cd binutils-gdb-gdb-14.2-release/
+    
     CMD="CFLAGS=\"${GCC_OPTS}\" "
     CMD+="CXXFLAGS=\"${GXX_OPTS}\" "
     CMD+="LDFLAGS=\"-static\" "
@@ -45,8 +51,8 @@ build_gdb() {
     CMD+="${BUILD_DIRECTORY}/binutils-gdb/configure --build=x86_64-linux-musl --host=$(get_host_triple) "
     CMD+="--disable-shared --enable-static --enable-gdbserver --disable-nls --disable-inprocess-agent --with-gmp=/usr/local --with-mpfr=/usr/local"
 
-    mkdir -p "${BUILD_DIRECTORY}/gdb_build"
-    cd "${BUILD_DIRECTORY}/gdb_build/"
+    #mkdir -p "${BUILD_DIRECTORY}/gdb_build"
+    #cd "${BUILD_DIRECTORY}/gdb_build/"
     eval "$CMD"
     make -j4
     
