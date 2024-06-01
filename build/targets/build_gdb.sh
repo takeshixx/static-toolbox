@@ -15,6 +15,22 @@ source $GITHUB_WORKSPACE/build/lib.sh
 init_lib $1
 
 build_gdb() {
+    cd "${BUILD_DIRECTORY}"
+    wget https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz
+    tar xf gmp-6.3.0.tar.xz
+    cd gmp-6.3.0
+    ./configure --host=arm-none-linux-gnueabi --disable-shared --enable-static
+    make -j4
+    make install
+
+    cd "${BUILD_DIRECTORY}"
+    wget https://www.mpfr.org/mpfr-current/mpfr-4.2.1.tar.gz
+    tar xzf mpfr-4.2.1.tar.gz
+    cd mpfr-4.2.1
+    ./configure --host=arm-none-linux-gnueabi --disable-shared --enable-static --with-gmp-build=/work/gmp-6.3.0/
+    make -j4
+    make install
+
     fetch "$GIT_BINUTILS_GDB" "${BUILD_DIRECTORY}/binutils-gdb" git
     cd "${BUILD_DIRECTORY}/binutils-gdb/" || { echo "Cannot cd to ${BUILD_DIRECTORY}/binutils-gdb/"; exit 1; }
     git clean -fdx
@@ -27,7 +43,7 @@ build_gdb() {
         CMD+="CPP_FOR_BUILD=\"/x86_64-linux-musl-cross/bin/x86_64-linux-musl-g++\" "
     fi
     CMD+="${BUILD_DIRECTORY}/binutils-gdb/configure --build=x86_64-linux-musl --host=$(get_host_triple) "
-    CMD+="--disable-shared --enable-static --enable-gdbserver --disable-nls --disable-inprocess-agent"
+    CMD+="--disable-shared --enable-static --enable-gdbserver --disable-nls --disable-inprocess-agent --with-gmp=/usr/local --with-mpfr=/usr/local"
 
     mkdir -p "${BUILD_DIRECTORY}/gdb_build"
     cd "${BUILD_DIRECTORY}/gdb_build/"
