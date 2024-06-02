@@ -16,18 +16,31 @@ init_lib $1
 
 build_gdb() {
     cd "${BUILD_DIRECTORY}"
-    wget https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz
-    tar xf gmp-6.3.0.tar.xz
-    cd gmp-6.3.0
+    #wget https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz
+    #tar xf gmp-6.3.0.tar.xz
+    #cd gmp-6.3.0
+
+    git clone https://github.com/alisw/GMP.git
+    cd GMP
+    git clean -fdx
+    git checkout v6.2.1
+
     ./configure --host=arm-none-linux-gnueabi --disable-shared --enable-static
     make -j4
     make install
 
     cd "${BUILD_DIRECTORY}"
-    wget https://www.mpfr.org/mpfr-current/mpfr-4.2.1.tar.gz
-    tar xzf mpfr-4.2.1.tar.gz
-    cd mpfr-4.2.1
-    ./configure --host=arm-none-linux-gnueabi --disable-shared --enable-static --with-gmp-build="${BUILD_DIRECTORY}/gmp-6.3.0/"
+    #wget https://www.mpfr.org/mpfr-current/mpfr-4.2.1.tar.gz
+    #tar xzf mpfr-4.2.1.tar.gz
+    #cd mpfr-4.2.1
+
+    git clone https://gitlab.inria.fr/mpfr/mpfr.git
+    cd mpfr
+    git clean -fdx
+    git checkout 4.2.1
+    
+    #./configure --host=arm-none-linux-gnueabi --disable-shared --enable-static --with-gmp-build="${BUILD_DIRECTORY}/gmp-6.3.0/"
+    ./configure --host=arm-none-linux-gnueabi --disable-shared --enable-static --with-gmp="/usr/local"
     make -j4
     make install
 
@@ -40,7 +53,7 @@ build_gdb() {
     wget https://github.com/bminor/binutils-gdb/archive/refs/tags/gdb-14.2-release.tar.gz
     tar xzf gdb-14.2-release.tar.gz
     cd binutils-gdb-gdb-14.2-release/
-    
+
     CMD="CFLAGS=\"${GCC_OPTS}\" "
     CMD+="CXXFLAGS=\"${GXX_OPTS}\" "
     CMD+="LDFLAGS=\"-static\" "
@@ -53,6 +66,7 @@ build_gdb() {
 
     #mkdir -p "${BUILD_DIRECTORY}/gdb_build"
     #cd "${BUILD_DIRECTORY}/gdb_build/"
+
     eval "$CMD"
     make -j4
     
